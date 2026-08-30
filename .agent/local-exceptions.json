@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "description": "Exceções locais explícitas e com prazo de revisão para este satélite. Vazio = nenhuma exceção ativa; toda entrada exige id, scope específico, reason, owner, approvedAt e expiresAt.",
+  "exceptions": []
+}

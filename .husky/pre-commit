@@ -1,4 +1,43 @@
+#!/bin/sh
 
+# >>> doctor:satellite node-bootstrap >>>
+NODE_BIN="$(command -v node 2>/dev/null || true)"
+
+if [ -z "$NODE_BIN" ] && [ -n "$HOME" ] && [ -s "$HOME/.nvm/nvm.sh" ]; then
+  export NVM_DIR="$HOME/.nvm"
+  . "$NVM_DIR/nvm.sh"
+  NODE_BIN="$(command -v node 2>/dev/null || true)"
+fi
+
+if [ -z "$NODE_BIN" ]; then
+  echo "ERRO: Node.js não encontrado no PATH. Abortando pre-commit."
+  exit 1
+fi
+
+if [ -d "./node_modules/.bin" ]; then
+  export PATH="$(pwd)/node_modules/.bin:$PATH"
+fi
+
+restage_staged_files() {
+  printf '%s\n' "$STAGED_FILES" | while IFS= read -r file; do
+    if [ -n "$file" ] && [ -e "$file" ]; then
+      git add -- "$file"
+    fi
+  done
+}
+# <<< doctor:satellite node-bootstrap <<<
+# >>> doctor:satellite staged-prelude >>>
+STAGED_FILES="$(git diff --cached --name-only --diff-filter=ACMR)"
+STAGED_COUNT="$(printf '%s\n' "$STAGED_FILES" | sed '/^$/d' | wc -l | tr -d ' ')"
+LINT_STAGED_DIRECT_THRESHOLD="${LINT_STAGED_DIRECT_THRESHOLD:-1}"
+
+if [ -z "$STAGED_FILES" ]; then
+  echo "Nenhum arquivo staged. Pre-commit encerrado."
+  exit 0
+fi
+# <<< doctor:satellite staged-prelude <<<
+
+# --- Conteúdo local preservado pelo doctor:satellite --fix ---
 echo "🔒 Executando verificações de pré-commit..."
 
 # 1. PROTEÇÃO DO HUB (CRÍTICO)
@@ -14,7 +53,7 @@ if git diff --cached --name-only | grep -qE "^\.agent/hub(/|$)"; then
   echo "   git restore --staged .agent/hub/"
   echo ""
   echo "   Se você precisa alterar regras do Hub:"
-  echo "   1. Navegue até E:\\Agents"
+  echo "   1. Navegue até D:\\Agents"
   echo "   2. Faça as alterações lá"
   echo "   3. Commit e push no repositório do Hub"
   echo ""
@@ -27,3 +66,15 @@ npx lint-staged
 npm run validate:theme
 npm run check
 npm run verify
+
+# >>> doctor:satellite restage-guard >>>
+# Re-inclui no stage a formatação aplicada pelo passo local acima.
+doctor_restage_staged_files() {
+  printf '%s\n' "$STAGED_FILES" | while IFS= read -r file; do
+    if [ -n "$file" ] && [ -e "$file" ]; then
+      git add -- "$file"
+    fi
+  done
+}
+doctor_restage_staged_files
+# <<< doctor:satellite restage-guard <<<

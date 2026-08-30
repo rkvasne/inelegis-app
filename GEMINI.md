@@ -6,12 +6,14 @@ trigger: always_on
 
 > **Hub Link:** `.agent/hub/` (READ-ONLY)
 > **Priority:** P0 (GEMINI.md) > P1 (Persona) > P2 (Skill)
-> **Hub Version:** v0.6.4
+> **Hub Version:** v0.10.8
 > **Isolamento:** Hub ↔ Satélite (Governança Bidirecional)
 
-Este projeto consome inteligência centralizada do Solo Dev Hub através de Junctions.
+Este projeto consome inteligência centralizada do Agents Hub através de links para `.agent/hub/` (`junction` no Windows; `symlink` em Linux/WSL).
 
-**⚠️ GOVERNANÇA:** Este projeto possui AUTONOMIA LIMITADA, estando vinculado às regras e padrões do Solo Dev Hub.
+> **Convenção de exemplos:** se este documento mostrar caminhos/comandos de um shell específico, isso serve como **exemplo operacional**. O contrato geral do Hub continua **neutro e cross-platform**, com equivalentes locais quando o projeto rodar fora desse ambiente.
+
+**⚠️ GOVERNANÇA:** Este projeto possui AUTONOMIA LIMITADA, estando vinculado às regras e padrões do Agents Hub.
 O Hub governa a inteligência e o DNA; este projeto as aplica localmente.
 Satélites NÃO alteram o Hub. Hub é READ-ONLY nesta instância.
 
@@ -78,7 +80,7 @@ PERGUNTA: O projeto que estou editando é realmente o "meu" projeto atual?
 **Caminhos PROIBIDOS para edição:**
 
 - `.agent/hub/*` (TODO o conteúdo)
-- Qualquer caminho que resolva para `E:\Agents` via Junction
+- Qualquer caminho que resolva para o Hub central via `.agent/hub/` (ex.: `D:\Agents`)
 
 **Caminhos PERMITIDOS:**
 
@@ -98,8 +100,11 @@ Classifique antes de agir:
 
 Pare e pergunte antes de codar:
 
-- **New Feature:** Mínimo 3 perguntas estratégicas.
+- **New Feature:** até 3 perguntas estratégicas em uma única rodada.
 - **Bug Fix:** Confirme impacto e causa raiz.
+- **Saída obrigatória:** na mesma resposta das perguntas, inclua uma seção fixa `Respostas recomendadas`.
+- **Formato:** uma resposta consolidada, curta e pronta para uso, deixando `Suposição` explícita quando houver incerteza.
+- **Aprovação rápida:** se o usuário responder `ok`, `segue`, `pode usar as recomendadas`, `aprovado` ou equivalente, implemente na rodada seguinte sem abrir nova bateria de perguntas.
 
 ---
 
@@ -111,12 +116,20 @@ Pare e pergunte antes de codar:
 
 ---
 
+## 📚 Documentação externa atualizada
+
+Para comportamento atual ou versionado de biblioteca, framework, SDK, runtime, ferramenta ou padrão sujeito a mudança, consulte a fonte oficial. Use `Context7` quando estiver disponível; se ele não estiver conectado, não bloqueie o trabalho e registre a fonte e a versão consultadas. `Context7` é documentação versionada, diferente do MCP `context-mode`, que otimiza o uso de contexto.
+
+---
+
 ## 🧹 Clean Code & Standards
 
 - **Code:** Conciso, direto, sem over-engineering.
-- **Testing:** AAA Pattern (Arrange, Act, Assert).
+- **Testing:** AAA Pattern (Arrange, Act, Assert). Prefira unitário + integração como baseline; Playwright/E2E só com justificativa.
 - **Git:** Commits em Português (pt-BR) seguindo Conventional Commits.
 - **Encoding:** UTF-8 BOM em todos os arquivos Markdown.
+- **Resposta:** Resultado e impacto primeiro, linguagem simples, cerca de 80–180 palavras em conclusões comuns e sem repetir informações.
+- **Fechamento:** `Fonte | Ausência | Suposição`; `Sugestões opcionais` somente quando acrescentarem algo fora do próximo passo e da rota.
 
 ---
 
@@ -124,13 +137,22 @@ Pare e pergunte antes de codar:
 
 Ao finalizar uma tarefa:
 
-1. **Consulte** `.agent/hub/brain/prompts/README.md`.
-2. **Sugira** o próximo prompt lógico para avançar o projeto.
+1. **Consulte internamente** o lifecycle em `.agent/hub/brain/prompts/prompt-registry.json` pelo roteador; use o README da biblioteca como índice humano.
+2. **Informe o próximo passo imediato** com prompt/ação e motivo, sem delegar `prompt:next` ao terminal do usuário.
+3. **Mostre a rota recomendada restante** e classifique cada etapa como `obrigatória`, `condicional`, `recomendada` ou `opcional`.
+4. **Não volte no ciclo por reflexo:** etapas anteriores devem aparecer como concluídas/dispensadas, nunca como nova recomendação.
+5. **Mantenha proporcionalidade:** testes e review após implementação; Prompt 34 conforme risco; documentação conforme impacto; Prompt 19 opcional e parametrizado.
+6. **Mostre `Prompts executados`** em uma linha quando o lifecycle tiver uma cadeia oficial. Não reconstrua a sequência pela memória do chat.
+7. **Evite repetição:** `Próximo Passo` e `Rota recomendada` concentram as ações; `Sugestões opcionais` só acrescentam alternativas.
+8. **Fechamento honesto:** em task/plano, separe `Entregue` de `Pendências`. Nunca chame uma onda parcial de conclusão; sem backlog, declare `Pendências: nenhuma`.
 
-> **Exemplo:** "Código criado. 👉 **Próximo Passo:** Rode `11-testing-strategy.md` para validar."
+> **Exemplo — feature:** **Próximo Passo:** `08-feature-build.md` — implementar o escopo fechado. **Rota recomendada:** `[condicional] 04/05/06/07 → [obrigatório] 08 → 11 → [condicional] 34 → [obrigatório] code review → [condicional] 17 → [obrigatório] 36 → [opcional] 19`.
 
 ---
 
-_Configurado via Solo Dev Hub (v0.6.4)_
-_Última atualização: 09/03/2026_
-_Editado via: Antigravity | Modelo: gemini-2.0-pro | OS: Windows 11_
+_Configurado via Agents Hub (v0.10.8)_
+
+---
+
+_Última atualização: 30/08/2026 • v0.10.8_
+_Editado via: Claude Code (VS Code) | Modelo: Claude Sonnet 5 | OS: Windows 11_

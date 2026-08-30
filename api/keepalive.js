@@ -15,6 +15,21 @@ function str(value) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
+/**
+ * Latência em ms a partir do payload. Tenta cada candidato na ordem, coage
+ * string numérica, e rejeita NaN/Infinity/negativo. Retorna null se nenhum
+ * candidato for válido.
+ */
+function parseLatency(...candidates) {
+  for (const candidate of candidates) {
+    if (candidate === null || candidate === undefined || candidate === "")
+      continue;
+    const value = Number(candidate);
+    if (Number.isFinite(value) && value >= 0) return value;
+  }
+  return null;
+}
+
 /** Comparação de token em tempo constante (evita timing attack). */
 function tokensMatch(provided, expected) {
   const a = Buffer.from(String(provided));
@@ -87,12 +102,13 @@ export default async function handler(req, res) {
   const region = str(payload.region) || process.env.KEEPALIVE_REGION || null;
   const source =
     str(payload.source) || process.env.KEEPALIVE_SOURCE || "external-cron";
-  const latencyMs = Number.isFinite(payload.latency_ms)
-    ? payload.latency_ms
-    : null;
+  // Aceita response_time_ms (chave primária do receptor legado) com fallback
+  // para latency_ms; coage strings numéricas e descarta valores negativos.
+  const latencyMs = parseLatency(payload.response_time_ms, payload.latency_ms);
   const lastError =
     typeof payload.last_error === "string" ? payload.last_error : null;
   const status = str(payload.status) || (lastError ? "error" : "ok");
+  const isError = status === "error" || lastError !== null;
   const metadata =
     payload.metadata &&
     typeof payload.metadata === "object" &&
@@ -109,7 +125,7 @@ export default async function handler(req, res) {
       region,
       source,
       last_ping_at: now,
-      last_success_at: now,
+      last_success_at: isError ? undefined : now,
       last_error: lastError,
       latency_ms: latencyMs,
       schema_version: 1,

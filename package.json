@@ -17,7 +17,8 @@
     "test:unit": "node tests/formatters.test.js && node tests/exceptions.test.js && node tests/result-renderer.test.js && node tests/input-validator.test.js && node tests/validator-service.test.js && node tests/migration-crimes-consistency.test.js && node tests/toast.test.js && node tests/theme-manager.test.js",
     "test:theme": "node tests/theme-manager.test.js",
     "test:components": "node tests/components.test.js",
-    "test:all": "npm run test:unit && npm run test",
+    "test:node": "node --test tests/node/utils.test.mjs",
+    "test:all": "npm run test:unit && npm run test:node && npm run test",
     "test:standards": "node .agent/hub/system/validators/validator-web-standards.js public",
     "sync:js": "node scripts/sync-js.js",
     "sync:version": "node .agent/hub/system/scripts/sync-version.js",
@@ -65,7 +66,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "3.9.6",
-    "puppeteer": "^24.35.0",
+    "puppeteer": "^25.9.0",
     "rimraf": "6.0.1"
   },
   "engines": {
