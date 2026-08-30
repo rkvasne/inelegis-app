@@ -64,11 +64,12 @@
     "html-validate": "^10.6.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
-    "prettier": "^3.8.0",
-    "puppeteer": "^24.35.0"
+    "prettier": "3.9.6",
+    "puppeteer": "^24.35.0",
+    "rimraf": "6.0.1"
   },
   "engines": {
-    "node": "22.x"
+    "node": ">=20.0.0"
   },
   "overrides": {
     "minimatch": "^10.2.1",

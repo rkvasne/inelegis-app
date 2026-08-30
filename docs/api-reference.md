@@ -260,6 +260,32 @@ Executa limpeza de registros antigos (política de retenção). Uso típico: cro
 
 ---
 
+#### POST /api/keepalive
+
+Receptor de heartbeats do Cloudflare Worker central (padrão Hub Keepalive). Faz `upsert` na tabela singleton `keepalive` e, se `KEEPALIVE_EVENTS_ENABLED=true`, insere em `keepalive_events`. Substitui a Edge Function `supabase/functions/keepalive/index.ts` (mantida como fallback legado).
+
+| Item             | Valor                                                                   |
+| ---------------- | ----------------------------------------------------------------------- |
+| **Método**       | POST                                                                    |
+| **Autenticação** | `Authorization: Bearer <KEEPALIVE_TOKEN>` ou header `x-keepalive-token` |
+| **Content-Type** | application/json                                                        |
+
+**Payload (JSON, todos opcionais):** `project_slug`, `environment`, `region`, `source`, `status`, `latency_ms`, `last_error`, `metadata` (objeto). Campos ausentes usam defaults de env (`KEEPALIVE_PROJECT_SLUG`, `KEEPALIVE_ENVIRONMENT`, ...) ou fallbacks (`inelegis` / `prod`).
+
+**Resposta 200:**
+
+```json
+{
+  "ok": true,
+  "last_ping_at": "2026-08-29T00:00:00.000Z",
+  "events_logged": true
+}
+```
+
+**Respostas:** 200 OK; 401 token inválido ou ausente; 405 método ≠ POST; 500 `KEEPALIVE_TOKEN` ou credenciais Supabase (`NEXT_PUBLIC_SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`) ausentes no servidor.
+
+---
+
 ### B. Supabase RPC (consumo direto pelo frontend)
 
 O frontend usa o cliente Supabase com a chave **anon** (pública). As funções abaixo são as principais para integração.
@@ -429,5 +455,5 @@ Retorna totais gerais para o painel administrativo (uso com **service_role** ou 
 
 ---
 
-_Última atualização: 09/03/2026 • v0.3.29 (Hub v0.6.4)_
-_Editado via: Antigravity | Modelo: gemini-2.0-pro | OS: Windows 11_
+_Última atualização: 29/08/2026 • v0.3.29 (Hub v0.6.4)_
+_Editado via: Claude Code (VS Code) | Modelo: Claude Sonnet 5 | OS: Windows 11_

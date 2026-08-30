@@ -2,54 +2,72 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   quality-gate:
     name: 🛡️ Quality Gate
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: 🛰️ Checkout Projeto Satélite
-      uses: actions/checkout@v4
+      - name: 🛰️ Checkout Projeto Satélite
+        uses: actions/checkout@v4
 
-    - name: 🧠 Checkout Agents Hub (Cérebro em .agent/hub)
-      uses: actions/checkout@v4
-      with:
-        repository: rkvasne/agents-rules
-        path: .agent/hub
-        ref: main
-        token: ${{ secrets.HUB_ACCESS_TOKEN }}
+      - name: 🧠 Checkout Agents Hub (Cérebro em .agent/hub)
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          repository: rkvasne/agents-rules
+          path: .agent/hub
+          ref: main
+          token: ${{ secrets['HUB_ACCESS_TOKEN'] != '' && secrets['HUB_ACCESS_TOKEN'] || github.token }}
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22'
-        cache: 'npm'
+      - name: Verificar disponibilidade do Hub
+        shell: bash
+        env:
+          HUB_ACCESS_TOKEN: ${{ secrets['HUB_ACCESS_TOKEN'] }}
+        run: |
+          set -euo pipefail
+          if [ ! -f ".agent/hub/system/validators/validator-integrity.js" ]; then
+            if [ -z "${HUB_ACCESS_TOKEN:-}" ]; then
+              echo "❌ Hub indisponível no CI. O repositório rkvasne/agents-rules é privado para este workflow."
+              echo "   Configure o secret HUB_ACCESS_TOKEN (PAT com permissão de leitura no repositório do Hub)."
+            else
+              echo "❌ Hub indisponível mesmo com HUB_ACCESS_TOKEN. Verifique se o token ainda é válido e tem leitura em rkvasne/agents-rules."
+            fi
+            exit 1
+          fi
+          echo "✅ Hub disponível em modo read-only"
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
 
-    - name: 🔒 Security Audit
-      # Falha apenas em vulnerabilidades altas ou críticas
-      run: npm audit --audit-level=high
+      - name: Install dependencies
+        run: npm ci
 
-    - name: 🎨 Linting & Code Style
-      run: npm run lint
+      - name: 🔒 Security Audit
+        # Falha apenas em vulnerabilidades altas ou críticas
+        run: npm audit --audit-level=high
 
-    - name: 🎭 Theme Validation
-      run: npm run validate:theme
+      - name: 🎨 Linting & Code Style
+        run: npm run lint
 
-    - name: 🧪 Run Tests (Unit & Components)
-      run: npm run test:all
-      env:
-        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      - name: 🎭 Theme Validation
+        run: npm run validate:theme
 
-    - name: 📚 Documentation Check
-      run: npm run doc:check
+      - name: 🧪 Run Tests (Unit & Components)
+        run: npm run test:all
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      - name: 📚 Documentation Check
+        run: npm run doc:check
 
   build-verification:
     name: 🏗️ Build Verification
@@ -57,60 +75,60 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 🛰️ Checkout Projeto Satélite
-      uses: actions/checkout@v4
-    
-    - name: 🧠 Checkout Agents Hub (Cérebro em .agent/hub)
-      uses: actions/checkout@v4
-      with:
-        repository: rkvasne/agents-rules
-        path: .agent/hub
-        ref: main
-        token: ${{ secrets.HUB_ACCESS_TOKEN }}
+      - name: 🛰️ Checkout Projeto Satélite
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22'
-        cache: 'npm'
+      - name: 🧠 Checkout Agents Hub (Cérebro em .agent/hub)
+        uses: actions/checkout@v4
+        with:
+          repository: rkvasne/agents-rules
+          path: .agent/hub
+          ref: main
+          token: ${{ secrets['HUB_ACCESS_TOKEN'] != '' && secrets['HUB_ACCESS_TOKEN'] || github.token }}
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
 
-    - name: 🏗️ Build Project
-      run: npm run build
-      env:
-        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      - name: Install dependencies
+        run: npm ci
 
-    - name: 🐳 Pre-pull Docker base image (retry)
-      shell: bash
-      run: |
-        set -euo pipefail
-        for attempt in 1 2 3; do
-          echo "Pull attempt $attempt/3: node:22-alpine"
-          if docker pull node:22-alpine; then
-            exit 0
-          fi
-          if [ "$attempt" -lt 3 ]; then
-            sleep $((attempt * 20))
-          fi
-        done
-        echo "::error::Falha ao baixar node:22-alpine após 3 tentativas."
-        exit 1
+      - name: 🏗️ Build Project
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
-    - name: 🐳 Docker Build Check (retry)
-      shell: bash
-      run: |
-        set -euo pipefail
-        for attempt in 1 2 3; do
-          echo "Docker build attempt $attempt/3"
-          if docker build . --file Dockerfile --tag inelegis:latest; then
-            exit 0
-          fi
-          if [ "$attempt" -lt 3 ]; then
-            sleep $((attempt * 20))
-          fi
-        done
-        echo "::error::Docker build falhou após 3 tentativas."
-        exit 1
+      - name: 🐳 Pre-pull Docker base image (retry)
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            echo "Pull attempt $attempt/3: node:22-alpine"
+            if docker pull node:22-alpine; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              sleep $((attempt * 20))
+            fi
+          done
+          echo "::error::Falha ao baixar node:22-alpine após 3 tentativas."
+          exit 1
+
+      - name: 🐳 Docker Build Check (retry)
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            echo "Docker build attempt $attempt/3"
+            if docker build . --file Dockerfile --tag inelegis:latest; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              sleep $((attempt * 20))
+            fi
+          done
+          echo "::error::Docker build falhou após 3 tentativas."
+          exit 1

@@ -43,7 +43,7 @@ Configurações para o **Keepvasne Keepalive Worker central** que atua como disp
 
 ---
 
-## �️ 4. Governança e Hub (Desenvolvimento)
+## 🛡️ 4. Governança e Hub (Desenvolvimento)
 
 Necessário para que a IA e os scripts de validação consigam acessar o conhecimento centralizado.
 
@@ -67,14 +67,14 @@ SUPABASE_SERVICE_ROLE_KEY="eyJhbGci..."
 ANALYTICS_ADMIN_TOKEN="sua_senha_secreta"
 
 # Zeladoria (Manutenção)
-CRON_SECRET="token_da_faxina_vercel"
+CRON_SECRET="troque-pelo-secret-do-cron-na-vercel"
 HISTORY_RETENTION_DAYS=90
 
 # Monitoramento (Reference)
-KEEPALIVE_TOKEN="mesmo_do_cloudflare"
+KEEPALIVE_TOKEN="troque-pelo-mesmo-valor-configurado-no-cloudflare"
 
 # Governança
-HUB_ACCESS_TOKEN="ghp_seu_token_github"
+HUB_ACCESS_TOKEN="troque-pelo-seu-pat-do-github"
 ```
 
 ---

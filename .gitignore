@@ -16,7 +16,10 @@ test-report.json
 *.log
 supabase/structure/
 supabase/structure/*.json
-telemetry/
+# Neutralizado pelo Hub em 27/08/2026: o Git NAO re-inclui arquivo dentro de
+# diretorio excluido, entao esta linha impedia versionar telemetry/snapshots/.
+# O bloco hub:telemetry-retention abaixo lista o que continua ignorado.
+# telemetry/
 
 # Backups e temporários
 *.backup
@@ -45,3 +48,29 @@ Thumbs.db
 .env.local
 
 .vercel
+
+# Config gerado a partir das env vars (npm run supabase:config).
+# Regenerado no build da Vercel e no serve/dev local; nao versionar a chave.
+public/assets/js/supabase-config.js
+
+# >>> hub:telemetry-retention (gerenciado pelo Hub — nao editar a mao)
+# O historico do ecossistema mora NO SATELITE. Auditado em 27/08/2026: os
+# satelites que ja versionavam telemetria preservaram eventos desde fevereiro;
+# os que a mantinham so local perderam tudo que passou do buffer de 200.
+#
+# Volatil (ignorado): usage.json e a janela de 200 do dashboard, reescrita a
+# cada evento; logs e backups sao ruido de diff.
+telemetry/usage.json
+telemetry/prompt-lifecycle.json
+telemetry/prompt-usage-sync.json
+telemetry/events-archive.jsonl
+telemetry/backups/
+telemetry/hub-sync.json
+telemetry/*.log
+#
+# Duravel (VERSIONADO): snapshots particionados por mes. A particao fecha
+# quando o mes acaba e o Git para de reescreve-la. Varrido em 27/08/2026:
+# zero credencial, e-mail, IP, JWT ou caminho de usuario.
+!telemetry/snapshots/
+!telemetry/snapshots/**
+# <<< hub:telemetry-retention

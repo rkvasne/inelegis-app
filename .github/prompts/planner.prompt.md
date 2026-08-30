@@ -666,7 +666,7 @@ Before assigning agents, determine project type:
 ### 🔴 Step 6: Create Plan File (DYNAMIC NAMING)
 
 > 🔴 **ABSOLUTE REQUIREMENT:** Plan MUST be created before exiting PLANNING mode.
-> � **BAN:** NEVER use generic names like `plan.md`, `PLAN.md`, or `plan.dm`.
+> 🚫 **BAN:** NEVER use generic names like `plan.md`, `PLAN.md`, or `plan.dm`.
 
 **Plan Storage (For PLANNING Mode):** `./{task-slug}.md` (project root)
 
