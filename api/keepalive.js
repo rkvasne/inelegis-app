@@ -101,7 +101,7 @@ export default async function handler(req, res) {
     str(payload.environment) || process.env.KEEPALIVE_ENVIRONMENT || "prod";
   const region = str(payload.region) || process.env.KEEPALIVE_REGION || null;
   const source =
-    str(payload.source) || process.env.KEEPALIVE_SOURCE || "external-cron";
+    str(payload.source) || process.env.KEEPALIVE_SOURCE || "cloudflare-worker";
   // Aceita response_time_ms (chave primária do receptor legado) com fallback
   // para latency_ms; coage strings numéricas e descarta valores negativos.
   const latencyMs = parseLatency(payload.response_time_ms, payload.latency_ms);
