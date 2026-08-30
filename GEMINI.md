@@ -6,7 +6,7 @@ trigger: always_on
 
 > **Hub Link:** `.agent/hub/` (READ-ONLY)
 > **Priority:** P0 (GEMINI.md) > P1 (Persona) > P2 (Skill)
-> **Hub Version:** v0.10.8
+> **Hub Version:** v0.10.9
 > **Isolamento:** Hub ↔ Satélite (Governança Bidirecional)
 
 Este projeto consome inteligência centralizada do Agents Hub através de links para `.agent/hub/` (`junction` no Windows; `symlink` em Linux/WSL).
@@ -150,9 +150,9 @@ Ao finalizar uma tarefa:
 
 ---
 
-_Configurado via Agents Hub (v0.10.8)_
+_Configurado via Agents Hub (v0.10.9)_
 
 ---
 
-_Última atualização: 30/08/2026 • v0.10.8_
+_Última atualização: 30/08/2026 • v0.10.9_
 _Editado via: Claude Code (VS Code) | Modelo: Claude Sonnet 5 | OS: Windows 11_

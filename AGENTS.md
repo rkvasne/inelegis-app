@@ -2,7 +2,7 @@
 
 > **Link do Hub:** `.agent/hub/` (Obrigatório)
 > **Modo:** Hub-First & SSoT (Single Source of Truth)
-> **Hub Version:** v0.10.8
+> **Hub Version:** v0.10.9
 
 Este projeto integra o ecossistema Agents Hub. O Agente de IA deve priorizar as definições centralizadas no Hub para comportamento e governança.
 
@@ -291,5 +291,5 @@ edit public/consulta.html
 
 ---
 
-_Última atualização: 30/08/2026 • v0.10.8_
+_Última atualização: 30/08/2026 • v0.10.9_
 _Editado via: Claude Code (VS Code) | Modelo: Claude Sonnet 5 | OS: Windows 11_

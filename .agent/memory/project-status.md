@@ -87,6 +87,10 @@
 
 **Log de Governança/Sessão:**
 
+- 30/08/2026: **Keepalive — migração equivocada revertida.** Nesta sessão o receptor foi migrado por engano para `api/keepalive.js` (Vercel) e a Edge Function apagada. Verificação contra as fontes canônicas do Hub (`guide-keepalive-monitoring.md` árvore de decisão: `Vanilla/Static → Supabase Edge Function`; `ARCHITECTURE.md` Exemplo 2 cita o Inelegis nominalmente) confirmou que o padrão é **Supabase Edge Function**. Revertido: `supabase/functions/keepalive/index.ts` restaurado (+ hardening: compare de token em tempo constante, sem log de prefixo do segredo), `api/keepalive.js` removido, docs e `.env.example` corrigidos. **Mantido** (independente do receptor): fix do `vercel.json` (`public`/`name` obsoletos que travavam deploy há 82 dias), migration `20260830000100_keepalive_contract_consolidation.sql`, sync de governança Hub, tooling (prettier 3.9.6/rimraf/engines), `tests/node/`, bump puppeteer 25 (0 vulnerabilidades), fix husky. `KEEPALIVE_URLS` do Worker central sempre apontou para a Edge Function — nunca precisou mudar.
+
+- 30/08/2026: **Prompts 19/23/36/21/26 (cadeia da sessão):** checkpoint do keepalive, satellite-sync ao Hub, RC gate PASS, remoção de legado e auditoria de compliance. Achado da auditoria: sem ping real do Worker desde 29/08 23:00 UTC (gap >10h) — pendência de diagnóstico no Cloudflare (sem acesso wrangler nesta sessão).
+
 - 03/03/2026: **Prompt 19 (checkpoint sem bump) — encerramento da sessão atual:** documentação e memória local sincronizadas após normalização das inconsistências (`satellite-risk-catalog` e task dashboard), com rastreabilidade registrada em `CHANGELOG [Unreleased]` e status preparado para persistência Git.
 
 - 03/03/2026: **Normalização de inconsistências documentais da memória local:** corrigidas duas divergências de estado nesta sessão — (1) `satellite-risk-catalog.md` deixou de estar sem avaliação registrada e passou a conter entrada formal da rodada (status, mitigação, rollback e evidências), e (2) `task-dashboard-v0-3-12-refinement.md` foi alinhada ao `status: completed` com checklist final marcado como concluído.

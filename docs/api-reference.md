@@ -260,29 +260,7 @@ Executa limpeza de registros antigos (política de retenção). Uso típico: cro
 
 ---
 
-#### POST /api/keepalive
-
-Receptor de heartbeats do Cloudflare Worker central (padrão Hub Keepalive). Faz `upsert` na tabela singleton `keepalive` e, se `KEEPALIVE_EVENTS_ENABLED=true`, insere em `keepalive_events`. Substituiu a Edge Function `supabase/functions/keepalive/index.ts` (removida do repositório em 30/08/2026 após cutover validado; ver `docs/guides/keepalive-inelegis.md`).
-
-| Item             | Valor                                                                   |
-| ---------------- | ----------------------------------------------------------------------- |
-| **Método**       | POST                                                                    |
-| **Autenticação** | `Authorization: Bearer <KEEPALIVE_TOKEN>` ou header `x-keepalive-token` |
-| **Content-Type** | application/json                                                        |
-
-**Payload (JSON, todos opcionais):** `project_slug`, `environment`, `region`, `source`, `status`, `latency_ms`, `last_error`, `metadata` (objeto). Campos ausentes usam defaults de env (`KEEPALIVE_PROJECT_SLUG`, `KEEPALIVE_ENVIRONMENT`, ...) ou fallbacks (`inelegis` / `prod`).
-
-**Resposta 200:**
-
-```json
-{
-  "ok": true,
-  "last_ping_at": "2026-08-29T00:00:00.000Z",
-  "events_logged": true
-}
-```
-
-**Respostas:** 200 OK; 401 token inválido ou ausente; 405 método ≠ POST; 500 `KEEPALIVE_TOKEN` ou credenciais Supabase (`NEXT_PUBLIC_SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`) ausentes no servidor.
+> **Keepalive não é endpoint Vercel.** O receptor de heartbeat do Inelegis é uma **Supabase Edge Function** (`supabase/functions/keepalive/index.ts`, rota `POST /functions/v1/keepalive`), conforme o padrão do Hub para stacks estáticos/sem SSR. Contrato e variáveis em [keepalive-inelegis.md](guides/keepalive-inelegis.md).
 
 ---
 

@@ -13,19 +13,19 @@ Guia unificado de configuração do monitoramento externo para **reduzir o risco
 O Inelegis usa a variante **Decoupled** do padrão Hub:
 
 1. **Pinger:** Keepvasne Keepalive Cloudflare Worker (a cada 30 min).
-2. **Receptor:** Vercel Serverless Function (`api/keepalive.js`, rota `/api/keepalive`).
+2. **Receptor:** Supabase Edge Function (`keepalive`).
 3. **Persistência:** Tabelas `keepalive` e `keepalive_events` no Supabase.
 
 ```
 Frontend:  Vanilla JS/HTML estático (Vercel)
 Backend:   API Routes serverless (Vercel /api/*)
-Keepalive: Vercel Serverless (/api/keepalive)
+Keepalive: Edge Function (Supabase)
 Database:  PostgreSQL (Supabase)
 ```
 
-**Por que Vercel Serverless e não Edge Function?** O receptor foi migrado para `/api/keepalive` a fim de concentrar toda a superfície serverless na Vercel (mesma stack de `/api/analytics`, `/api/dashboard`), reaproveitar `SUPABASE_SERVICE_ROLE_KEY` já configurada e simplificar deploy/observabilidade. Vercel Serverless Functions não exigem Next.js/SSR — funcionam em projeto estático.
+**Por que Edge Function e não API Route?** O Inelegis é site estático sem SSR. A árvore de decisão do Hub (`guide-keepalive-monitoring.md`) define **Supabase Edge Function** para stacks `Vanilla / Static / PHP / Outros`; `API Route` só para `Next.js / SSR`. O `ARCHITECTURE.md` do Hub cita o Inelegis nominalmente (Exemplo 2). Ganho concreto: independência do hosting — se o build da Vercel quebra, o keepalive continua rodando no Supabase (cenário real em 08/2026: 82 dias de deploy Vercel quebrado sem afetar o heartbeat).
 
-**Legado removido (30/08/2026):** cutover validado ao vivo (200/401 confirmados em produção contra `/api/keepalive`, evento gravado). Código-fonte da Edge Function `supabase/functions/keepalive/index.ts` removido do repositório. A função deployada no Supabase (`https://btdbfspuazgerdbmurza.supabase.co/functions/v1/keepalive`) ainda respondia 401 no momento da remoção — a conta usada nesta sessão não tem privilégio na API de gestão de Functions (`403 LegacyFunctionsListUnexpectedStatusError`). **Ação manual pendente:** apagar a function `keepalive` pelo Dashboard do Supabase (Project Settings → Edge Functions) ou via `supabase functions delete keepalive --project-ref btdbfspuazgerdbmurza` com uma conta com privilégio.
+> **Nota histórica (30/08/2026):** houve uma migração equivocada do receptor para `api/keepalive.js` (Vercel), revertida no mesmo dia após verificação contra as fontes canônicas do Hub. O `KEEPALIVE_URLS` do Worker central sempre apontou para a Edge Function.
 
 **Referência:** `.agent/hub/docs/guides/guide-keepalive-monitoring.md` e `.agent/hub/system/scaffolding/keepalive/ARCHITECTURE.md`
 
@@ -35,11 +35,11 @@ Database:  PostgreSQL (Supabase)
 
 ### 1. Keepvasne Keepalive Worker (Central)
 
-| Variável                | Valor/Formato                                                                         |
-| ----------------------- | ------------------------------------------------------------------------------------- |
-| `KEEPALIVE_URLS`        | CSV de destinos. Para o Inelegis incluir: `https://inelegis.vercel.app/api/keepalive` |
-| `KEEPALIVE_TOKEN`       | Mesmo segredo configurado na Vercel (`KEEPALIVE_TOKEN`).                              |
-| `KEEPALIVE_ADMIN_TOKEN` | Opcional para trigger manual autenticado do worker central.                           |
+| Variável                | Valor/Formato                                                                                               |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `KEEPALIVE_URLS`        | CSV de destinos. Para o Inelegis incluir: `https://btdbfspuazgerdbmurza.supabase.co/functions/v1/keepalive` |
+| `KEEPALIVE_TOKEN`       | Mesmo segredo configurado no Supabase (Edge Function).                                                      |
+| `KEEPALIVE_ADMIN_TOKEN` | Opcional para trigger manual autenticado do worker central.                                                 |
 
 **Cron Trigger:** `*/30 * * * *` (a cada 30 minutos).
 
@@ -49,46 +49,38 @@ Database:  PostgreSQL (Supabase)
 
 ---
 
-### 2. Vercel Serverless Function (Receptor)
+### 2. Supabase Edge Function (Receptor)
 
-**Arquivo:** `api/keepalive.js` — rota `POST /api/keepalive`
+**Arquivo:** `supabase/functions/keepalive/index.ts`
 
-| Variável (Vercel)                       | Descrição                                                         |
-| --------------------------------------- | ----------------------------------------------------------------- |
-| `KEEPALIVE_TOKEN`                       | Mesmo valor do Cloudflare (Bearer ou header `x-keepalive-token`). |
-| `NEXT_PUBLIC_SUPABASE_URL`              | URL do projeto Supabase.                                          |
-| `SUPABASE_SERVICE_ROLE_KEY`             | Chave service role (upsert na tabela singleton `keepalive`).      |
-| `KEEPALIVE_EVENTS_ENABLED`              | `true` para gravar histórico em `keepalive_events` (opcional).    |
-| `KEEPALIVE_PROJECT_SLUG`                | Default do slug quando ausente no payload (fallback `inelegis`).  |
-| `KEEPALIVE_ENVIRONMENT`                 | Default do ambiente (fallback `prod`).                            |
-| `KEEPALIVE_REGION` / `KEEPALIVE_SOURCE` | Defaults opcionais de metadados.                                  |
+| Secret                      | Descrição                 |
+| --------------------------- | ------------------------- |
+| `KEEPALIVE_TOKEN`           | Mesmo valor do Cloudflare |
+| `SUPABASE_URL`              | URL do projeto            |
+| `SUPABASE_ANON_KEY`         | Chave anon                |
+| `SUPABASE_SERVICE_ROLE_KEY` | Chave service role        |
 
-Respostas: `200` heartbeat aceito · `401` token inválido/ausente · `405` método ≠ POST · `500` credenciais do servidor ausentes.
-
-**Dashboard:** `https://vercel.com/rkvasne/inelegis-app/settings/environment-variables`
-
-> **Legado removido do repositório.** Fonte da Edge Function apagada em 30/08/2026 após cutover validado; a function deployada no Supabase segue pendente de remoção manual (ver seção Arquitetura).
+**Dashboard:** `https://supabase.com/dashboard/project/btdbfspuazgerdbmurza/settings/functions`
 
 ---
 
 ### 3. Vercel — O que configurar
 
-| Variável                                           | Necessário para                                            |
-| -------------------------------------------------- | ---------------------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`                         | Frontend (RPC `verificar_elegibilidade`)                   |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY`                    | Frontend autenticar chamadas                               |
-| `SUPABASE_SERVICE_ROLE_KEY`                        | API Routes (`/api/analytics`, `/api/dashboard`) bypass RLS |
-| `HISTORY_RETENTION_DAYS`                           | Limpeza de histórico                                       |
-| `CRON_SECRET`                                      | Endpoints de manutenção                                    |
-| `ANALYTICS_ADMIN_TOKEN`                            | Dashboard admin                                            |
-| `KEEPALIVE_TOKEN`                                  | Receptor `/api/keepalive` autenticar o pinger              |
-| `KEEPALIVE_EVENTS_ENABLED`                         | Ligar histórico em `keepalive_events` (opcional)           |
-| `KEEPALIVE_PROJECT_SLUG` / `KEEPALIVE_ENVIRONMENT` | Defaults do receptor (opcional)                            |
+| Variável                        | Necessário para                                            |
+| ------------------------------- | ---------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Frontend (RPC `verificar_elegibilidade`)                   |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Frontend autenticar chamadas                               |
+| `SUPABASE_SERVICE_ROLE_KEY`     | API Routes (`/api/analytics`, `/api/dashboard`) bypass RLS |
+| `HISTORY_RETENTION_DAYS`        | Limpeza de histórico                                       |
+| `CRON_SECRET`                   | Endpoints de manutenção                                    |
+| `ANALYTICS_ADMIN_TOKEN`         | Dashboard admin                                            |
 
 ### ❌ NÃO configurar na Vercel
 
+- `KEEPALIVE_TOKEN` — receptor está no Supabase
+- `KEEPALIVE_PROJECT_SLUG`
+- `KEEPALIVE_ENVIRONMENT`
 - `KEEPALIVE_URLS` (variável do worker central no Cloudflare)
-- `SUPABASE_ANON_KEY` do lado servidor (o receptor usa a service role)
 
 ---
 
@@ -100,7 +92,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://btdbfspuazgerdbmurza.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
 
-# Keepalive receptor /api/keepalive (opcional para dev)
+# Keepalive (opcional para dev)
 KEEPALIVE_TOKEN=...
 KEEPALIVE_PROJECT_SLUG=inelegis
 KEEPALIVE_ENVIRONMENT=dev
@@ -117,8 +109,8 @@ ANALYTICS_ADMIN_TOKEN=...
 ## ✅ Validação
 
 1. **Confirmar inclusão no keepvasne:** endpoint do Inelegis presente no `KEEPALIVE_URLS` central.
-2. **Ping manual no receptor:** `curl -X POST https://inelegis.vercel.app/api/keepalive -H "Authorization: Bearer [TOKEN]"` → espera `{"ok":true,...}`.
-3. **Logs:** verificar a function `/api/keepalive` no painel da Vercel para confirmar pings recebidos do Cloudflare.
+2. **Ping manual no receptor:** `curl -X POST https://btdbfspuazgerdbmurza.supabase.co/functions/v1/keepalive -H "Authorization: Bearer [TOKEN]"`
+3. **Logs:** verificar Edge Function no Supabase para confirmar pings recebidos do Cloudflare.
 4. **Dashboard:** `/admin/sistema.html` — status de Uptime em tempo real.
 
 ### Colunas de Compliance (Hub)
@@ -130,9 +122,9 @@ Para compliance de auditoria, `keepalive_events` deve conter:
 - `status_code`
 - `response_time_ms`
 
-No Inelegis, a migration de compatibilidade é:
-`supabase/migrations/20260226000100_keepalive_hub_compat.sql`
-(mantém retrocompatibilidade com `status` e `latency_ms`).
+No Inelegis, as colunas vêm de:
+`supabase/migrations/20260226000100_keepalive_hub_compat.sql` (adiciona `status_code`/`response_time_ms` + backfill) e
+`supabase/migrations/20260830000100_keepalive_contract_consolidation.sql` (reafirma tabelas, colunas, índices e RLS num arquivo único, idempotente — sem `DROP`).
 
 ---
 
@@ -140,7 +132,7 @@ No Inelegis, a migration de compatibilidade é:
 
 | Problema                           | Solução                                                                              |
 | ---------------------------------- | ------------------------------------------------------------------------------------ |
-| **Keepalive 401**                  | Tokens diferentes. Cloudflare e Vercel devem ter `KEEPALIVE_TOKEN` idêntico.         |
+| **Keepalive 401**                  | Tokens diferentes. Cloudflare e Supabase devem ter `KEEPALIVE_TOKEN` idêntico.       |
 | **Sem ping no Inelegis**           | Verifique se a URL do Inelegis foi adicionada ao `KEEPALIVE_URLS` do worker central. |
 | **Build: ANON_KEY não encontrada** | Adicione `NEXT_PUBLIC_SUPABASE_ANON_KEY` na Vercel e redeploy.                       |
 | **API Routes 500**                 | Verifique `SUPABASE_SERVICE_ROLE_KEY` na Vercel.                                     |
