@@ -23,7 +23,9 @@ Keepalive: Vercel Serverless (/api/keepalive)
 Database:  PostgreSQL (Supabase)
 ```
 
-**Por que Vercel Serverless e não Edge Function?** O receptor foi migrado para `/api/keepalive` a fim de concentrar toda a superfície serverless na Vercel (mesma stack de `/api/analytics`, `/api/dashboard`), reaproveitar `SUPABASE_SERVICE_ROLE_KEY` já configurada e simplificar deploy/observabilidade. Vercel Serverless Functions não exigem Next.js/SSR — funcionam em projeto estático. A Edge Function `supabase/functions/keepalive/index.ts` permanece no repositório como fallback legado e não é mais o alvo oficial do pinger.
+**Por que Vercel Serverless e não Edge Function?** O receptor foi migrado para `/api/keepalive` a fim de concentrar toda a superfície serverless na Vercel (mesma stack de `/api/analytics`, `/api/dashboard`), reaproveitar `SUPABASE_SERVICE_ROLE_KEY` já configurada e simplificar deploy/observabilidade. Vercel Serverless Functions não exigem Next.js/SSR — funcionam em projeto estático.
+
+**Legado removido (30/08/2026):** cutover validado ao vivo (200/401 confirmados em produção contra `/api/keepalive`, evento gravado). Código-fonte da Edge Function `supabase/functions/keepalive/index.ts` removido do repositório. A função deployada no Supabase (`https://btdbfspuazgerdbmurza.supabase.co/functions/v1/keepalive`) ainda respondia 401 no momento da remoção — a conta usada nesta sessão não tem privilégio na API de gestão de Functions (`403 LegacyFunctionsListUnexpectedStatusError`). **Ação manual pendente:** apagar a function `keepalive` pelo Dashboard do Supabase (Project Settings → Edge Functions) ou via `supabase functions delete keepalive --project-ref btdbfspuazgerdbmurza` com uma conta com privilégio.
 
 **Referência:** `.agent/hub/docs/guides/guide-keepalive-monitoring.md` e `.agent/hub/system/scaffolding/keepalive/ARCHITECTURE.md`
 
@@ -65,7 +67,7 @@ Respostas: `200` heartbeat aceito · `401` token inválido/ausente · `405` mét
 
 **Dashboard:** `https://vercel.com/rkvasne/inelegis-app/settings/environment-variables`
 
-> **Legado:** `supabase/functions/keepalive/index.ts` continua versionado como fallback, mas não recebe mais tráfego do pinger oficial.
+> **Legado removido do repositório.** Fonte da Edge Function apagada em 30/08/2026 após cutover validado; a function deployada no Supabase segue pendente de remoção manual (ver seção Arquitetura).
 
 ---
 
@@ -158,5 +160,5 @@ Ver também: [troubleshooting-vercel-deploy.md](troubleshooting-vercel-deploy.md
 
 ---
 
-_Última atualização: 29/08/2026 • v0.3.29 (Hub v0.6.4)_
+_Última atualização: 30/08/2026 • v0.3.29 (Hub v0.6.4)_
 _Editado via: Claude Code (VS Code) | Modelo: Claude Sonnet 5 | OS: Windows 11_

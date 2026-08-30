@@ -262,7 +262,7 @@ Executa limpeza de registros antigos (política de retenção). Uso típico: cro
 
 #### POST /api/keepalive
 
-Receptor de heartbeats do Cloudflare Worker central (padrão Hub Keepalive). Faz `upsert` na tabela singleton `keepalive` e, se `KEEPALIVE_EVENTS_ENABLED=true`, insere em `keepalive_events`. Substitui a Edge Function `supabase/functions/keepalive/index.ts` (mantida como fallback legado).
+Receptor de heartbeats do Cloudflare Worker central (padrão Hub Keepalive). Faz `upsert` na tabela singleton `keepalive` e, se `KEEPALIVE_EVENTS_ENABLED=true`, insere em `keepalive_events`. Substituiu a Edge Function `supabase/functions/keepalive/index.ts` (removida do repositório em 30/08/2026 após cutover validado; ver `docs/guides/keepalive-inelegis.md`).
 
 | Item             | Valor                                                                   |
 | ---------------- | ----------------------------------------------------------------------- |
@@ -455,5 +455,5 @@ Retorna totais gerais para o painel administrativo (uso com **service_role** ou 
 
 ---
 
-_Última atualização: 29/08/2026 • v0.3.29 (Hub v0.6.4)_
+_Última atualização: 30/08/2026 • v0.3.29 (Hub v0.6.4)_
 _Editado via: Claude Code (VS Code) | Modelo: Claude Sonnet 5 | OS: Windows 11_
