@@ -1,0 +1,16 @@
+name: Sync hub-finding to Hub Project
+
+on:
+  issues:
+    types: [opened, labeled]
+
+jobs:
+  add-to-project:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'hub-finding')
+    steps:
+      - uses: actions/add-to-project@5afcf98fcd03f1c2f92c3c83f58ae24323cc57fd # v2.0.0
+        with:
+          project-url: ${{ vars.HUB_FINDINGS_PROJECT_URL }}
+          github-token: ${{ secrets.HUB_FINDINGS_TOKEN }}
+          labeled: hub-finding
