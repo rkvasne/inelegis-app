@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "channel": "auto",
+  "expectedSha": "ae8f5524ae04938339f4f077149b4ebfe40d5d32",
+  "notes": "Use canary somente para testar o Hub vivo; nao ha checkout automatico."
+}
