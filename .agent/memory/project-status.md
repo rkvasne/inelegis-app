@@ -1,17 +1,26 @@
 # 📊 Project Status & Context
 
-> **Last Updated:** 09/03/2026
+> **Last Updated:** 07/09/2026
 > **Current Phase:** Testes com usuários reais / Zeladoria
 > **Project Version:** v0.3.29 (SSoT Synchronized)
+> **Hub Version:** v0.12.1
 
 ## 📅 Log de Sessão / Últimas Atualizações
 
-### 08.06.2026 - Junction Hub corrigida
+### 2026-09-07 — Satellite Sync Hub v0.12.1
+
+- **Satellite Sync (Prompt 23):** governança alinhada ao Hub v0.12.1; produto permanece em v0.3.29 sem bump de app.
+- **Contratos:** `AGENTS.md` e `GEMINI.md` regenerados do template (identidade Inelegis + regra `public/assets/js` preservadas); `hub-channel.json` repin `af96aa63`.
+- **Tooling:** `apply-governance-scripts` injetou aliases (`doctor:satellite`, `check:hub`, `verify:*`, `state`, etc.); exceções locais para `analyze:deps`, `analyze:unused` e `qa:governance` (sem knip/dependency-cruiser).
+- **Validação:** `doctor:satellite` 29/29 OK; `check:hub` OK; findings GitHub sem abertos.
+- **Checkpoint (Prompt 19):** documentação (`CHANGELOG` [Unreleased]), testes, `verify:full`, commit e push sem bump.
+
+### 2026-06-08 — Junction Hub corrigida
 
 - **Submodule removido:** `.agent/hub` deixou de ser submodule Git (incorreto) e passou a junction local para `D:\Agents`, alinhado ao padrão do ecossistema.
 - **Validação:** `validator-integrity.js` acessível via junction; pasta permanece em `.gitignore`.
 
-### 09.03.2026 - Hub Sync v0.6.4 & DNA Regeneration
+### 2026-03-09 — Hub Sync v0.6.4 & DNA Regeneration
 
 - **Satellite Sync (Prompt 23):** Executado o ciclo de sincronização técnica e de governança com o Solo Dev Hub (v0.6.4).
 - **Governança:** `AGENTS.md` e `GEMINI.md` atualizados para o padrão do Hub v0.6.4, incluindo novas assinaturas e travas de proteção.
@@ -19,7 +28,7 @@
 - **Validação:** Ambiente local validado via `npm run verify` (100% CONFORME).
 - **Encerramento Diário (Prompt 19):** Checkpoint final executado com persistência via Git.
 
-### 03.03.2026 - Higiene de Memória & Compliance Keepalive
+### 2026-03-03 — Higiene de Memória & Compliance Keepalive
 
 - [x] **fix(historico):** Migration `20260225000100_historico_consultas.sql` — função `add_to_history` expandida para 12 parâmetros (inciso, alinea, paragrafo, motivo_detalhado, excecoes_citadas, metadata). API `api/search-history.js` passou a usar RPC em vez de INSERT direto; mapeamento completo em getHistory/addToHistory. Frontend `search-history.js` mapeia todos os campos no fetch.
 - [x] **docs:** api-reference, auditoria-e-monitoramento, migrations-status e setup-supabase atualizados.
@@ -164,5 +173,5 @@
 
 ---
 
-_Última atualização: 08/06/2026 • v0.3.29_
-_Editado via: Cursor | Modelo: Composer | OS: Windows 11_
+_Última atualização: 07/09/2026 • v0.3.29_
+_Editado via: Grok Build | Modelo: Grok 4.5 | OS: Windows 11_

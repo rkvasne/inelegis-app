@@ -1,5 +1,33 @@
 {
   "schemaVersion": 1,
   "description": "Exceções locais explícitas e com prazo de revisão para este satélite. Vazio = nenhuma exceção ativa; toda entrada exige id, scope específico, reason, owner, approvedAt e expiresAt.",
-  "exceptions": []
+  "exceptions": [
+    {
+      "id": "skip-analyze-deps-depcruise",
+      "scope": "scripts:analyze:deps",
+      "reason": "Satélite HTML/JS estático sem dependency-cruiser instalado; script gerado pelo bootstrap apontava depcruise sem devDependency e falhava o doctor por dependency confusion. Reavaliar quando houver adoção formal de analyze:deps.",
+      "owner": "rkvasne",
+      "approvedAt": "2026-09-07",
+      "expiresAt": "2027-03-07",
+      "status": "active"
+    },
+    {
+      "id": "skip-analyze-unused-knip",
+      "scope": "scripts:analyze:unused",
+      "reason": "Satélite sem knip instalado; script gerado pelo bootstrap apontava knip sem devDependency e falhava o doctor por dependency confusion. Reavaliar quando houver adoção formal de analyze:unused.",
+      "owner": "rkvasne",
+      "approvedAt": "2026-09-07",
+      "expiresAt": "2027-03-07",
+      "status": "active"
+    },
+    {
+      "id": "qa-governance-circular-only",
+      "scope": "scripts:qa:governance",
+      "reason": "Sem knip/dependency-cruiser no satélite; qa:governance fica só em analyze:circular (runner do Hub). Evita bootstrap --force reintroduzir pipeline completa quebrada.",
+      "owner": "rkvasne",
+      "approvedAt": "2026-09-07",
+      "expiresAt": "2027-03-07",
+      "status": "active"
+    }
+  ]
 }

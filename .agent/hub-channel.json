@@ -1,6 +1,13 @@
 {
   "schemaVersion": 1,
   "channel": "auto",
-  "expectedSha": "ae8f5524ae04938339f4f077149b4ebfe40d5d32",
-  "notes": "Use canary somente para testar o Hub vivo; nao ha checkout automatico."
+  "expectedSha": "af96aa63551528204073e2442db01f404c435254",
+  "notes": "Use canary somente para testar o Hub vivo; nao ha checkout automatico.",
+  "lastAutoRepin": {
+    "from": "ae8f5524ae04938339f4f077149b4ebfe40d5d32",
+    "to": "af96aa63551528204073e2442db01f404c435254",
+    "at": "2026-09-07T23:17:51.037Z",
+    "impact": "low",
+    "checks": ["clean_tree", "ancestor_compatible", "impact_below_threshold"]
+  }
 }

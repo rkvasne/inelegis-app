@@ -11,6 +11,20 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [Unreleased]
+
+### chore
+
+- **chore(governança):** Satellite Sync (Prompt 23) com Hub v0.12.1 — `AGENTS.md`/`GEMINI.md` regenerados do template (identidade Inelegis e trava `public/assets/js` preservadas); `hub-channel.json` em canal `auto` (SHA `af96aa63`); scripts de governança via `apply-governance-scripts` (`doctor:satellite`, `check:hub`, `verify:*`, `state`, etc.).
+- **chore(exceções):** `.agent/local-exceptions.json` isenta `analyze:deps`, `analyze:unused` e `qa:governance` até instalar knip/dependency-cruiser; `qa:governance` fica em `analyze:circular`.
+- **chore(hooks):** `.husky/post-commit` (sync de telemetria de prompts) e bloco Hub em `.prettierignore` para artefatos gerados de IDE.
+
+### docs
+
+- **docs(env):** `.env.example` — comentário do keepalive restaurado para Supabase Edge Function `/functions/v1/keepalive` e `KEEPALIVE_PROJECT_SLUG=inelegis`.
+- **docs(memória):** log de sessão em formato ISO (`### AAAA-MM-DD — Título`) + entrada do sync v0.12.1; produto permanece em v0.3.29 sem bump.
+- **docs(prompt19-checkpoint):** Checkpoint com documentação, testes, commit e push sem bump após o Prompt 23.
+
 ## [0.3.29] - 09/03/2026
 
 ### chore
@@ -338,5 +352,5 @@ As alterações das versões **v0.2.0 a v0.3.11** e **v0.1.x** foram movidas par
 - 📂 [v0.2.0 a v0.3.11](docs/archive/2026-02-23-release-history-v0-3-early.md)
 - 📂 [v0.1.x](docs/archive/2026-02-23-release-history-v0.md)
 
-_Última atualização: 03/03/2026 • v0.3.28 (Hub v0.6.2)_
-_Editado via: Copilot (VS Code) | Modelo: GPT-5.3-Codex | OS: Windows 11_
+_Última atualização: 07/09/2026 • v0.3.29 (Hub v0.12.1)_
+_Editado via: Grok Build | Modelo: Grok 4.5 | OS: Windows 11_
